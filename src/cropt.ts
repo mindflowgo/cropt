@@ -139,8 +139,8 @@ class Cropt {
             options.viewport = { ...this.options.viewport, ...options.viewport };
 
             // set default width/height if none / too-small
-            if (!options.viewport?.width || options.viewport.width < 100) options.viewport.width = element.clientWidth - 60;
-            if (!options.viewport?.height || options.viewport.height < 100) options.viewport.height = element.clientHeight - 60;
+            if (!options.viewport?.width || options.viewport.width < 100) options.viewport.width = Math.max(100, element.clientWidth - 60);
+            if (!options.viewport?.height || options.viewport.height < 100) options.viewport.height = Math.max(100, element.clientHeight - 60);
         }
         
         // changed: removed structuredClone: slow, and would fail passing functions in options
