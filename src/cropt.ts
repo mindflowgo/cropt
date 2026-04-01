@@ -8,8 +8,8 @@ declare global {
 function debounce<T extends Function>(func: T, wait: number) {
     let timer: number | undefined;
     return (...args: any) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => func(...args), wait);
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => func(...args), wait);
     };
 }
 
@@ -17,7 +17,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = "anonymous"; // important to avoid CORS when using external pictures
-        
+
         img.onload = () => {
             resolve(img);
         };
@@ -118,7 +118,7 @@ class Cropt {
     // active settings 
     #maxZoom = 0.85; // up to 1 possible
     #viewportMinWidth = 50; // for adjustable, min viewport width
-    #viewportMinHeight = 50; 
+    #viewportMinHeight = 50;
 
     #scale = 1;
     #rotation = 0;
@@ -142,10 +142,10 @@ class Cropt {
             if (!options.viewport?.width || options.viewport.width < 100) options.viewport.width = Math.max(100, element.clientWidth - 60);
             if (!options.viewport?.height || options.viewport.height < 100) options.viewport.height = Math.max(100, element.clientHeight - 60);
         }
-        
+
         // changed: removed structuredClone: slow, and would fail passing functions in options
         this.options = { ...this.options, ...options } as CroptOptions;
-        if( this.options.transparencyColor ) this.#transparencyColor = this.options.transparencyColor;
+        if (this.options.transparencyColor) this.#transparencyColor = this.options.transparencyColor;
         this.element = element;
         this.element.classList.add("cropt-container");
 
@@ -181,10 +181,10 @@ class Cropt {
         }
 
         this.elements.zoomer.type = "range";
-        this.elements.zoomer.step = "0.001";
+        this.elements.zoomer.step = "0.0001";
         this.elements.zoomer.value = "1";
         // zooming can happen with pinch, however when slider enabled, it is visible, otherwise unseen
-        if (this.options.enableZoomSlider) { 
+        if (this.options.enableZoomSlider) {
             this.elements.zoomer.className = this.options.zoomerInputClass;
             this.elements.zoomer.setAttribute("aria-label", "zoom");
             this.elements.toolBar.appendChild(this.elements.zoomer);
@@ -192,7 +192,7 @@ class Cropt {
 
         this.element.appendChild(this.elements.boundary);
         this.element.appendChild(this.elements.toolBar);
-        if (this.elements.toolBar.childNodes.length ) {
+        if (this.elements.toolBar.childNodes.length) {
             // there's something in toolbar, so show it, and adjust height of picture-box
             this.element.style.setProperty('--cropt-toolbar', '32px');
         } else {
@@ -215,15 +215,15 @@ class Cropt {
         preset?:
             | number
             | {
-                  transform: {
-                      x: number;
-                      y: number;
-                      scale: number;
-                      rotate: number;
-                      origin: { x: number; y: number };
-                  };
-                  viewport: { width: number; height: number; borderRadius: string };
-              },
+                transform: {
+                    x: number;
+                    y: number;
+                    scale: number;
+                    rotate: number;
+                    origin: { x: number; y: number };
+                };
+                viewport: { width: number; height: number; borderRadius: string };
+            },
     ) {
         if (!src) {
             throw new Error("src cannot be empty");
@@ -308,12 +308,12 @@ class Cropt {
                 crop.x = origH - p.top - p.height;
                 crop.y = p.left;
             }
-        } else if( this.#rotation === 180 ) {
+        } else if (this.#rotation === 180) {
             crop.x = origW - p.left - p.width;
             crop.y = origH - p.top - p.height;
         }
-        crop.x = Math.max(0,crop.x); // sometimes calcs -1 or -3, clamp it to 0.
-        crop.y = Math.max(0,crop.y);
+        crop.x = Math.max(0, crop.x); // sometimes calcs -1 or -3, clamp it to 0.
+        crop.y = Math.max(0, crop.y);
 
         return {
             crop,
@@ -335,12 +335,12 @@ class Cropt {
     toCanvas(size: number | null = null, type: string = '') {
         const points = this.#getPoints();
         const shrinkOnly = size && size < 0;
-        if( size && shrinkOnly ) size = -size; // make positive
+        if (size && shrinkOnly) size = -size; // make positive
         let finalWidth = points.width;
         let finalHeight = points.height;
 
         // resize only if size passed in (if negative only shrink if sides exceed final)
-        if (size && (!shrinkOnly || finalWidth > size || finalHeight > size)) {        
+        if (size && (!shrinkOnly || finalWidth > size || finalHeight > size)) {
             const vpRect = this.elements.viewport.getBoundingClientRect();
             const ratio = vpRect.width / vpRect.height;
 
@@ -362,7 +362,7 @@ class Cropt {
         }
 
         return new Promise((resolve, reject) => {
-            this.toCanvas(size,type).then((canvas) => {
+            this.toCanvas(size, type).then((canvas) => {
                 canvas.toBlob(
                     (blob) => {
                         if (blob === null) {
@@ -399,7 +399,7 @@ class Cropt {
 
         // if viewport dimensions unchanged, don't change zoom
         if (viewport.width === curWidth && viewport.height === curHeight) return;
-        
+
         this.#updateZoomLimits();
     }
 
@@ -407,7 +407,7 @@ class Cropt {
         const zoomer = this.elements.zoomer;
         const zMin = parseFloat(zoomer.min);
         const zMax = parseFloat(zoomer.max);
-        zoomer.value = Math.max(zMin, Math.min(zMax, value)).toFixed(3);
+        zoomer.value = Math.max(zMin, Math.min(zMax, value)).toFixed(4);
         this.#onZoom();
     }
 
@@ -542,7 +542,7 @@ class Cropt {
         viewport.style.height = (this.options.viewport?.height || 100) + "px";
 
         // whenever viewport changes - need to move controls overlayed!
-        this.#updateControlHandlePositions(); 
+        this.#updateControlHandlePositions();
     }
 
     #setupControlOverlay() {
@@ -570,7 +570,7 @@ class Cropt {
         // Initialize resize handlers
         this.#initControlHandlers();
         // Hack - delay setup for UI layout to finalize (for larger images esp)
-        setTimeout( ()=> this.#updateControlHandlePositions(), 200 );
+        setTimeout(() => this.#updateControlHandlePositions(), 200);
     }
 
     #updateControlHandlePositions() {
@@ -693,7 +693,7 @@ class Cropt {
 
         return canvas;
     }
-    
+
     #getCanvas(points: CropPoints, finalWidth: number, finalHeight: number, type: string) {
         // cannot draw from a canvas into itself while resizing — it causes visual corruption
         // ping-pong oc -> buffer -> oc ....
@@ -710,7 +710,7 @@ class Cropt {
         if (ctx === null || octx === null || bctx === null) {
             throw new Error("Canvas context cannot be null");
         }
-        
+
         let to = {
             width: oc.width,
             height: oc.height,
@@ -742,7 +742,7 @@ class Cropt {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
         ctx.drawImage(oc, 0, 0, to.width, to.height, 0, 0, canvas.width, canvas.height);
-        
+
         oc.width = oc.height = 0; // ios hint to free
         buffer.width = buffer.height = 0;
         console.timeEnd('getCanvas')
@@ -882,9 +882,9 @@ class Cropt {
 
         const keyDown = (ev: KeyboardEvent) => {
             // for user-input fields we skip
-            if ( document.activeElement &&
+            if (document.activeElement &&
                 ["INPUT", "TEXTAREA", "SELECT", "BUTTON"]
-                .includes(document.activeElement.nodeName)) return;
+                    .includes(document.activeElement.nodeName)) return;
 
             const deltaXY = getArrowKeyDeltas(ev.key);
             if (deltaXY === null) return; // only care about arrow keys
@@ -892,7 +892,7 @@ class Cropt {
             if (ev.shiftKey && deltaXY[1]) {
                 ev.preventDefault();
                 const zoomVal = parseFloat(this.elements.zoomer.value);
-                this.setZoom(zoomVal + deltaXY[1]*0.005); // +/-2 *.005 = +/-0.01
+                this.setZoom(zoomVal + deltaXY[1] * 0.005); // +/-2 *.005 = +/-0.01
             } else {
                 ev.preventDefault();
                 this.#assignTransformCoordinates(deltaXY[0], deltaXY[1]);
@@ -904,11 +904,11 @@ class Cropt {
 
     #initializeZoom() {
         if (this.options.enableZoomSlider) {
-            this.elements.zoomer.addEventListener("input", ()=>this.#onZoom(), {
+            this.elements.zoomer.addEventListener("input", () => this.#onZoom(), {
                 signal: this.#abortController.signal,
             });
         }
-        
+
         if (this.options.mouseWheelZoom === "off") return;
 
         const scroll = (ev: WheelEvent) => {

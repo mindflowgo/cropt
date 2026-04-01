@@ -1,4 +1,7 @@
 # Changelog
+## [2.0.19] - 2026-03-31
+- Backfixes from Devtheorem's version.
+ 
 ## [2.0.18] - 2026-01-08
 - Adjusting viewport default size to be container - 60px (instead of 220px by 220px)
 

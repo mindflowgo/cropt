@@ -1,11 +1,17 @@
 # Cropt v2 - lightweight JavaScript image cropper
 [Github](https://github.com/mindflowgo/cropt/)
 
-Originally based on [Foliotek/Croppie](https://github.com/Foliotek/Croppie), but rewritten as a modern ES module with a simpler API, higher quality image scaling, and numerous other improvements by 
-[Devtheorem](https://devtheorem.github.io/cropt/).
+**Significant** code cleanup, and feature build-out from the original cropt by **Devtheorem**,without breaking backward compatibility, nor significantly increasing size. 
 
-It was extensively enhanced (but backwards compatible with v1) to include adjustable viewport, rotation, 
-keyboard handling, and various optimizations and bug fixes. And packed to work as browser install, commonJS, esm package, etc.
+**Includes distribution version for esm, commonjs, and browser install unlike the original.**
+
+Core new features:
+- we have **lots** more demos than the original
+- viewport adjustment (adjust the size of the crop image)
+- rotation (rotate the image)
+- rotate buttons (buttons to rotate the image)
+
+Originally based on [Foliotek/Croppie](https://github.com/Foliotek/Croppie), but rewritten as a modern ES module with a simpler API, higher quality image scaling, and numerous other improvements by [Devtheorem](https://devtheorem.github.io/cropt/).
 
 
 ## Quick Start
@@ -20,6 +26,10 @@ npm install cropt2
 ```
 
 ## Running Demo
+See the same demos on github: [https://mindflowgo.github.io/cropt/](https://mindflowgo.github.io/cropt/).
+
+1) [Optional] The run build prepares the distribution files if you modify the src files.
+2) To see the demos running locally  `npm start`.
 
 ```
 npm run build
