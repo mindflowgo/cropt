@@ -128,7 +128,10 @@ class Cropt {
     #abortController = new AbortController();
     #updateOverlayDebounced = debounce(() => {
         this.#updateOverlay();
-    }, 100);
+    }, 50);
+    #updateControlHandlesDebounced = debounce(() => {
+        this.#updateControlHandlePositions();
+    }, 16);
 
     constructor(element: HTMLElement, options: RecursivePartial<CroptOptions>) {
         if (element.classList.contains("cropt-container")) {
@@ -534,15 +537,18 @@ class Cropt {
         return { x, y, scale, rotate: this.#rotation, origin: parseOrigin() };
     }
 
-    #setViewportCss() {
+    #setViewportCss(immediate = true) {
         if (!this.elements?.viewport) return;
         const viewport = this.elements.viewport;
         viewport.style.borderRadius = this.options.viewport?.borderRadius || "50%";
         viewport.style.width = (this.options.viewport?.width || 100) + "px";
         viewport.style.height = (this.options.viewport?.height || 100) + "px";
 
-        // whenever viewport changes - need to move controls overlayed!
-        this.#updateControlHandlePositions();
+        if (immediate) {
+            this.#updateControlHandlePositions();
+        } else {
+            this.#updateControlHandlesDebounced();
+        }
     }
 
     #setupControlOverlay() {
@@ -610,26 +616,36 @@ class Cropt {
             const newWidth = Math.min(maxWidth, Math.max(this.#viewportMinWidth, rightStartWidth + deltaX));
 
             this.options.viewport.width = newWidth;
-            this.#setViewportCss();
+            this.#setViewportCss(false);
+            this.#updateOverlayDebounced();
         };
 
         const rightPointerUp = () => {
-            document.removeEventListener("pointermove", rightPointerMove);
-            document.removeEventListener("pointerup", rightPointerUp);
+            this.elements.resizeHandleRight.removeEventListener("pointermove", rightPointerMove);
+            this.elements.resizeHandleRight.removeEventListener("pointerup", rightPointerUp);
+            this.elements.resizeHandleRight.removeEventListener("lostpointercapture", rightPointerUp);
+            this.elements.overlay.style.pointerEvents = '';
+            this.#setViewportCss(true);
+            this.#updateOverlay();
         };
 
         const rightPointerDown = (ev: PointerEvent) => {
-            if (ev.button !== 0) return; // Only left mouse button
+            if (ev.button !== 0) return;
             ev.preventDefault();
             ev.stopPropagation();
 
+            this.elements.overlay.style.pointerEvents = 'none';
+            this.elements.resizeHandleRight.setPointerCapture(ev.pointerId);
             rightStartX = ev.pageX;
             rightStartWidth = this.options.viewport.width;
 
-            document.addEventListener("pointermove", rightPointerMove, {
+            this.elements.resizeHandleRight.addEventListener("pointermove", rightPointerMove, {
                 signal: this.#abortController.signal,
             });
-            document.addEventListener("pointerup", rightPointerUp, {
+            this.elements.resizeHandleRight.addEventListener("pointerup", rightPointerUp, {
+                signal: this.#abortController.signal,
+            });
+            this.elements.resizeHandleRight.addEventListener("lostpointercapture", rightPointerUp, {
                 signal: this.#abortController.signal,
             });
         };
@@ -649,26 +665,36 @@ class Cropt {
             const newHeight = Math.min(maxHeight, Math.max(this.#viewportMinHeight, bottomStartHeight + deltaY));
 
             this.options.viewport.height = newHeight;
-            this.#setViewportCss();
+            this.#setViewportCss(false);
+            this.#updateOverlayDebounced();
         };
 
         const bottomPointerUp = () => {
-            document.removeEventListener("pointermove", bottomPointerMove);
-            document.removeEventListener("pointerup", bottomPointerUp);
+            this.elements.resizeHandleBottom.removeEventListener("pointermove", bottomPointerMove);
+            this.elements.resizeHandleBottom.removeEventListener("pointerup", bottomPointerUp);
+            this.elements.resizeHandleBottom.removeEventListener("lostpointercapture", bottomPointerUp);
+            this.elements.overlay.style.pointerEvents = '';
+            this.#setViewportCss(true);
+            this.#updateOverlay();
         };
 
         const bottomPointerDown = (ev: PointerEvent) => {
-            if (ev.button !== 0) return; // Only left mouse button
+            if (ev.button !== 0) return;
             ev.preventDefault();
             ev.stopPropagation();
 
+            this.elements.overlay.style.pointerEvents = 'none';
+            this.elements.resizeHandleBottom.setPointerCapture(ev.pointerId);
             bottomStartY = ev.pageY;
             bottomStartHeight = this.options.viewport.height;
 
-            document.addEventListener("pointermove", bottomPointerMove, {
+            this.elements.resizeHandleBottom.addEventListener("pointermove", bottomPointerMove, {
                 signal: this.#abortController.signal,
             });
-            document.addEventListener("pointerup", bottomPointerUp, {
+            this.elements.resizeHandleBottom.addEventListener("pointerup", bottomPointerUp, {
+                signal: this.#abortController.signal,
+            });
+            this.elements.resizeHandleBottom.addEventListener("lostpointercapture", bottomPointerUp, {
                 signal: this.#abortController.signal,
             });
         };
